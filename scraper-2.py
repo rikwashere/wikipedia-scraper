@@ -61,7 +61,7 @@ def store(out, db):
 if __name__ == '__main__':
 	client = pymongo.MongoClient()
 	db = client['wikipedia']
-	
+
 	counter = 0
 	sleep = 5
 	
@@ -93,7 +93,7 @@ if __name__ == '__main__':
 
 		if len(new_revs) > 0:
 			print '\t-Inserting %i new revisions.' % len(new_revs) 
-			revisions.insert_one(random.choice(new_revs))
+			revisions.insert_many(new_revs)
 			sleep -= 1
 		else:
 			print '\t-No new revisions scraped.'
