@@ -13,92 +13,72 @@ import time
 import sys
 import re
 
-def scrape_api(out, counter):
-	source = 'https://nl.wikipedia.org/w/api.php'
-
-	data_keys = [ 	'user', 'userid', 'comment', 'parsedcomment', 'flags', 
-					'timestamp', 'title', 'ids', 'sizes', 'redirect', 
-					'loginfo', 'tags']
-
-	params = { 	'action' : 'query',
-				'list' : 'recentchanges',
-				'format': 'json',
-				'rcprop' : '|'.join(data_keys)}
-	
+def scrape_api(data, source, params, data_keys):	
 	r = requests.get(source, params=params)
 	json_response = json.loads(r.text)
 	changes = json_response['query']['recentchanges']
 
 	for change in changes:
-		# split revisions and changes
-		counter += 1
 		
 		if change.has_key('logid') and change['revid'] == 0:
 			change['_id'] = change['logid']
-			out['logs_out'].append(change)
+			data['logs'][change['_id']] = change
  		else:
 			change['_id'] = change['revid']
-			out['revisions_out'].append(change)
+			data['revisions'][change['_id']] = change
 
-	return out, counter
+	return data
 
-def store(out, db):
-	logs = db.logs
-	revisions = db.revisions
-
-	try:
-		max_log = max(logs.find({}, {'_id', 1}))['_id']
-		max_rev = max(revisions.find({}, {'_id', 1}))['_id']
-	except:
-		max_log = 0
-		max_rev = 0
-
-	logs.insert_many([c for c in out['logs_out'] if c['_id'] > max_log])
-	revisions.insert_many([c for c in out['revisions_out'] if c['_id'] > max_rev])
-
-	print 'Database has %i log and %i revisions.' % (logs.counter(), revisions.counter())
+def getLastUpdate(logs, revisions):
+	max_log = max(logs.find({}, {'_id': 1}))['_id']
+	max_rev = max(revisions.find({}, {'_id': 1}))['_id']
+	return max_rev, max_log
 
 if __name__ == '__main__':
+	# db stuff
 	client = pymongo.MongoClient()
 	db = client['wikipedia']
+	data = {	'revisions' : {},
+			'logs' : {}
+		}
 
-	counter = 0
-	sleep = 5
+	# load tables for logs and revisions
+	logs_db = db.logs
+	revisions_db = db.revisions
+	max_rev, max_log = getLastUpdate(logs_db, revisions_db)
+
+	# api stuff
+	source = 'https://nl.wikipedia.org/w/api.php'
+	data_keys = [ 	'user', 'userid', 'comment', 'parsedcomment', 'flags', 
+					'timestamp', 'title', 'ids', 'sizes', 'redirect', 
+					'loginfo', 'tags']
+	params = { 	'action' : 'query',
+				'list' : 'recentchanges',
+				'format': 'json',
+				'rcprop' : '|'.join(data_keys)}
+	nap_time = 5 # interval between requests
 	
 	while True:
-		out = {	'revisions_out' : [],
-				'logs_out' : []
-		}
 		print 'Scraping...'
-		out, counter = scrape_api(out, counter)
+		data = scrape_api(data, source, params, data_keys)
 
-		logs = db.logs
-		revisions = db.revisions
+		for rev_id in data['revisions']:
+			if rev_id > max_rev:
+				print '\tNew revision: %i > %i' % (rev_id, max_rev) 
+				revisions_db.insert_one(data['revisions'][rev_id])
+			else:
+				print '\tOld revision: %i < %i' % (rev_id, max_rev)
 
-		try:
-			max_log = max(logs.find({}, {'_id': 1}))['_id']
-			max_rev = max(revisions.find({}, {'_id': 1}))['_id']
-		except:
-			max_log = 0
-			max_rev = 0
+		for log_id in data['logs']:	
+			if log_id > max_log:
+				print '\tNew log: %i > %i' % (log_id, max_log) 
+				logs_db.insert_one(data['logs'][log_id])
+			else:
+				print '\tOld log: %i < %i' % (log_id, max_log) 
 
-		new_logs = [c for c in out['logs_out'] if c['_id'] > max_log]
-		new_revs = [c for c in out['revisions_out'] if c['_id'] > max_rev]
-
-		if len(new_logs) > 0:
-			print '\t-Inserting %i new log changes.' % len(new_logs)
-			logs.insert_many(new_logs)
-		else:
-			print '\t-No new logs scraped.'
-
-		if len(new_revs) > 0:
-			print '\t-Inserting %i new revisions.' % len(new_revs) 
-			revisions.insert_many(new_revs)
-			sleep -= 1
-		else:
-			print '\t-No new revisions scraped.'
-			sleep += 1
-
-		print 'Database has %i logs and %i revisions.' % (logs.count(), revisions.count())
-		print '%s - Sleeping %.2f seconds.\n' % (datetime.datetime.time(datetime.datetime.now()), sleep)
-		time.sleep(sleep)
+		print 'Database contains %i logs and %i revisions.' % (logs_db.count(), revisions_db.count())
+		print 'Crawled %i revisions and %i logs so far.' % (len(data['revisions']), len(data['logs']))
+		print '%s - Sleeping %.2f seconds.\n' % (datetime.datetime.time(datetime.datetime.now()), nap_time)
+		
+		max_rev, max_log = getLastUpdate(logs_db, revisions_db)
+		time.sleep(nap_time)
