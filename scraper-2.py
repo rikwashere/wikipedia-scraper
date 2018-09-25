@@ -53,7 +53,6 @@ def store(out, db):
 		max_log = 0
 		max_rev = 0
 
-	# dit werk niet!
 	logs.insert_many([c for c in out['logs_out'] if c['_id'] > max_log])
 	revisions.insert_many([c for c in out['revisions_out'] if c['_id'] > max_rev])
 
@@ -63,13 +62,13 @@ if __name__ == '__main__':
 	client = pymongo.MongoClient()
 	db = client['wikipedia']
 	
-	out = {	'revisions_out' : [],
-			'logs_out' : []
-		}
 	counter = 0
 	sleep = 5
 	
 	while True:
+		out = {	'revisions_out' : [],
+				'logs_out' : []
+		}
 		print 'Scraping...'
 		out, counter = scrape_api(out, counter)
 
