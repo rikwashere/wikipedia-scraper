@@ -34,9 +34,9 @@ if __name__ == '__main__':
 	client = pymongo.MongoClient()
 	db = client['wikipedia']
 	
-	data = {	'revisions' : {},
-				'logs' : {}
-			}
+	data = {'revisions' : {},
+			'logs' : {}
+		}
 
 	# load tables for logs and revisions
 	logs_db = db.logs
@@ -48,6 +48,7 @@ if __name__ == '__main__':
 	data_keys = [ 	'user', 'userid', 'comment', 'parsedcomment', 'flags', 
 					'timestamp', 'title', 'ids', 'sizes', 'redirect', 
 					'loginfo', 'tags']
+
 	params = { 	'action' : 'query',
 				'list' : 'recentchanges',
 				'format': 'json',
@@ -60,17 +61,17 @@ if __name__ == '__main__':
 
 		for rev_id in data['revisions']:
 			if rev_id > max_rev:
-				print '\tNew revision: %i > %i' % (rev_id, max_rev) 
+				print '\tNew revision: %i > %i (%s)' % (rev_id, max_rev, data['revisions'][rev_id]['timestamp']) 
 				revisions_db.insert_one(data['revisions'][rev_id])
 			else:
-				print '\tOld revision: %i < %i' % (rev_id, max_rev)
+				print '\tOld revision: %i < %i (%s)' % (rev_id, max_rev, data['revisions'][rev_id]['timestamp'])
 
 		for log_id in data['logs']:	
 			if log_id > max_log:
-				print '\tNew log: %i > %i' % (log_id, max_log) 
+				print '\tNew log: %i > %i (%s)' % (log_id, max_log, data['logs'][log_id]['timestamp']) 
 				logs_db.insert_one(data['logs'][log_id])
 			else:
-				print '\tOld log: %i < %i' % (log_id, max_log) 
+				print '\tOld log: %i < %i (%s)' % (log_id, max_log, data['logs'][log_id]['timestamp']) 
 
 		nap_time = (time.time() - t0) * random.randint(30,40)
 		print 'Database contains %i logs and %i revisions.' % (logs_db.count(), revisions_db.count())
@@ -78,6 +79,7 @@ if __name__ == '__main__':
 		print '%s - Sleeping %.2f seconds.\n' % (datetime.datetime.time(datetime.datetime.now()), nap_time)
 		
 		max_rev, max_log = getLastUpdate(logs_db, revisions_db)
+
 		data = {'revisions' : {},
 				'logs' : {}
 			}
