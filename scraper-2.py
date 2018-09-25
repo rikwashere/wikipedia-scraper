@@ -1,17 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
-from bs4 import BeautifulSoup
 import datetime
 import requests
-import sqlite3
 import pymongo
 import random
 import json
 import time
-import sys
-import re
 
 def scrape_api(data, source, params, data_keys):	
 	r = requests.get(source, params=params)
@@ -38,9 +33,10 @@ if __name__ == '__main__':
 	# db stuff
 	client = pymongo.MongoClient()
 	db = client['wikipedia']
+	
 	data = {	'revisions' : {},
-			'logs' : {}
-		}
+				'logs' : {}
+			}
 
 	# load tables for logs and revisions
 	logs_db = db.logs
@@ -56,10 +52,10 @@ if __name__ == '__main__':
 				'list' : 'recentchanges',
 				'format': 'json',
 				'rcprop' : '|'.join(data_keys)}
-	nap_time = 5 # interval between requests
 	
 	while True:
 		print 'Scraping...'
+		t0 = time.time()
 		data = scrape_api(data, source, params, data_keys)
 
 		for rev_id in data['revisions']:
@@ -76,9 +72,14 @@ if __name__ == '__main__':
 			else:
 				print '\tOld log: %i < %i' % (log_id, max_log) 
 
+		nap_time = (time.time() - t0) * random.randint(30,40)
 		print 'Database contains %i logs and %i revisions.' % (logs_db.count(), revisions_db.count())
 		print 'Crawled %i revisions and %i logs so far.' % (len(data['revisions']), len(data['logs']))
 		print '%s - Sleeping %.2f seconds.\n' % (datetime.datetime.time(datetime.datetime.now()), nap_time)
 		
 		max_rev, max_log = getLastUpdate(logs_db, revisions_db)
+		data = {'revisions' : {},
+				'logs' : {}
+			}
+
 		time.sleep(nap_time)
