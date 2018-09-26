@@ -14,17 +14,11 @@ def getRevisions(revisions):
 
 	for top_edited_page, count in top_edited_pages:
 		print '<%s> was edited %i times.' % (top_edited_page, count)
-
-<<<<<<< HEAD
-                for revision in revisions.find({'title':top_edited_page}):
-			print '\t Revision by <%s> at <%s>' % (revision['user'], revision['timestamp'])
-
-=======
+		
 		for revision in revisions.find({'title':top_edited_page})
 			print '\t %s by <%s> at <%s>' % (revision['type'], revision['user'], revision['timestamp'])
 			print '\t\t Mutation: %i' % (revision['new_len'] - revision['old_len'])
 			 
->>>>>>> 659fa99c629ca6dfa47f68b47a00b49c6187c16b
 if __name__ == '__main__':
 	client = pymongo.MongoClient()
 	db = client.wikipedia
