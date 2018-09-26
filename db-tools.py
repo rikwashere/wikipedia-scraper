@@ -20,6 +20,29 @@ def getRevisions(revisions):
 		for revision in revisions.find({'title':top_edited_page}):
 			print '\t %s by <%s> at <%s> (%i)' % (revision['type'], revision['user'], revision['timestamp'], (revision['newlen'] - revision['oldlen']))	
 			 
+def getActiveEditors(df):
+	edits_per_user = df['user'].value_counts().to_dict()
+
+	edits = {	'< 5' : [],
+				'5 - 24' : [],
+				'25 - 99' : [],
+				'> 100' : []
+				}
+
+	for editor in edits_per_user:
+		if edits_per_user[editor] < 5:
+			edits['< 5'].append(editor)
+		elif edits_per_user[editor] >= 5 and edits_per_user[editor] < 25:
+			edits['5 - 24'].append(editor)
+		elif edits_per_user[editor] >= 25 and edits_per_user[editor] < 100:
+			edits['25 - 99'].append(editor)
+		elif edits_per_user[editor] >= 100:
+			edits['> 100'].append(editor)
+
+	for edit in edits:
+		print '%s > %i' edit, edits[edit]
+
+
 def readMongo(collection, query):
 	cursor = collection.find(query)
 	df = pd.DataFrame(list(cursor))
@@ -34,3 +57,4 @@ if __name__ == '__main__':
 	
 	print getRevisions(db.revisions)
 	df = readMongo(db.revisions, {})
+	getActiveEditors(df)
