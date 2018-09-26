@@ -1,4 +1,5 @@
 from collections import Counter
+import pandas as pd
 import pymongo
 
 def getStats(db):
@@ -17,10 +18,19 @@ def getRevisions(revisions):
 		
 		print '<%s> was edited %i times, by %i different editors.' % (top_edited_page, count, editors)
 		for revision in revisions.find({'title':top_edited_page}):
-			print '\t %s by <%s> at <%s> (%i)' % (revision['type'], revision['user'], revision['timestamp'], (revision['newlen'] - revision['oldlen']))
+			print '\t %s by <%s> at <%s> (%i)' % (revision['type'], revision['user'], revision['timestamp'], (revision['newlen'] - revision['oldlen']))	
 			 
+def readMongo(db, collection, query=()):
+	cursor = db[collection].find(query)
+	df = pd.DataFrame(list(cursor))
+	del df['_id']
+
+	df.index = pd.to_datetime(df.timestamp)
+	return df
+
 if __name__ == '__main__':
 	client = pymongo.MongoClient()
 	db = client.wikipedia
 	
 	print getRevisions(db.revisions)
+	df = (db, 'revisions', ())
