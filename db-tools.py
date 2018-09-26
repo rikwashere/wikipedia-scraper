@@ -33,4 +33,4 @@ if __name__ == '__main__':
 	db = client.wikipedia
 	
 	print getRevisions(db.revisions)
-	df = readMongo(db.revisions, ())
+	df = readMongo(db.revisions, {})
