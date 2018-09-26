@@ -13,13 +13,13 @@ def getRevisions(revisions):
 	top_edited_pages = Counter([rev['title'] for rev in revisions.find()]).most_common(20)
 
 	for top_edited_page, count in top_edited_pages:
-		print '<%s> was edited %i times.' % (top_edited_pages, count)
+		print '<%s> was edited %i times.' % (top_edited_page, count)
 
-		for revision in revisions.find({'title':top_edited_page})
+                for revision in revisions.find({'title':top_edited_page}):
 			print '\t Revision by <%s> at <%s>' % (revision['user'], revision['timestamp'])
 
 if __name__ == '__main__':
 	client = pymongo.MongoClient()
 	db = client.wikipedia
 	
-	print getRevisions(db)
+	print getRevisions(db.revisions)
