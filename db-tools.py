@@ -15,7 +15,7 @@ def getRevisions(revisions):
 	for top_edited_page, count in top_edited_pages:
 		print '<%s> was edited %i times.' % (top_edited_page, count)
 		
-		for revision in revisions.find({'title':top_edited_page})
+		for revision in revisions.find({'title':top_edited_page}):
 			print '\t %s by <%s> at <%s>' % (revision['type'], revision['user'], revision['timestamp'])
 			print '\t\t Mutation: %i' % (revision['new_len'] - revision['old_len'])
 			 
