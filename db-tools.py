@@ -40,7 +40,7 @@ def getActiveEditors(df):
 			edits['> 100'].append(editor)
 
 	for edit in edits:
-		print '%s > %i' % (edit, edits[edit])
+		print '%s > %i' % (edit, len(edits[edit]))
 
 
 def readMongo(collection, query):
