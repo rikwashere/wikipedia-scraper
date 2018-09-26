@@ -17,7 +17,7 @@ def getRevisions(revisions):
 		
 		for revision in revisions.find({'title':top_edited_page}):
 			print '\t %s by <%s> at <%s>' % (revision['type'], revision['user'], revision['timestamp'])
-			print '\t\t Mutation: %i' % (revision['new_len'] - revision['old_len'])
+			print '\t\t Mutation: %i' % (revision['newlen'] - revision['oldlen'])
 			 
 if __name__ == '__main__':
 	client = pymongo.MongoClient()
