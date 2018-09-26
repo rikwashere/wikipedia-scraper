@@ -7,4 +7,4 @@ if __name__ == '__main__':
 	revisions = db.revisions
 	db_size = db.command('dbstats')['dataSize'] / (1024*1024)
 
-	print 'Database contains %s logs and %s revisions.\n Database is %.2f MB.' % (logs.count(), revisions.count(), db_size)
+	print 'Database contains %s logs and %s revisions.\nDatabase is %.2f MB.' % (logs.count(), revisions.count(), db_size)
