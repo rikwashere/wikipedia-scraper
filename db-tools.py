@@ -39,8 +39,10 @@ def getActiveEditors(df):
 		elif edits_per_user[editor] >= 100:
 			edits['> 100'].append(editor)
 
+	print '%i unique pages were editted.' % len(df['title'].value_counts().to_dict())
+ 
 	for edit in edits:
-		print '%s > %i' % (edit, len(edits[edit]))
+		print '%s -> %i' % (edit, len(edits[edit]))
 
 
 def readMongo(collection, query):
