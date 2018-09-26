@@ -20,8 +20,8 @@ def getRevisions(revisions):
 		for revision in revisions.find({'title':top_edited_page}):
 			print '\t %s by <%s> at <%s> (%i)' % (revision['type'], revision['user'], revision['timestamp'], (revision['newlen'] - revision['oldlen']))	
 			 
-def readMongo(db, collection, query=()):
-	cursor = db[collection].find(query)
+def readMongo(collection, query):
+	cursor = collection.find(query)
 	df = pd.DataFrame(list(cursor))
 	del df['_id']
 
@@ -33,4 +33,4 @@ if __name__ == '__main__':
 	db = client.wikipedia
 	
 	print getRevisions(db.revisions)
-	df = readMongo(db, 'revisions', ())
+	df = readMongo(db.revisions, ())
