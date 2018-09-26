@@ -5,6 +5,6 @@ if __name__ == '__main__':
 	db = client.wikipedia
 	logs = db.logs
 	revisions = db.revisions
-	db_size = db.stats(1024*1024)['size']
+	db_size = db.command('dbstats')['dataSize'] / (1024*1024)
 
 	print 'Database contains %s logs and %s revisions.\n Database is %.2f MB.' % (logs.count(), revisions.count(), db_size)
