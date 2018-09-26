@@ -13,11 +13,11 @@ def getRevisions(revisions):
 	top_edited_pages = Counter([rev['title'] for rev in revisions.find()]).most_common(20)
 
 	for top_edited_page, count in top_edited_pages:
-		print '<%s> was edited %i times.' % (top_edited_page, count)
+		editors = len(Counter([rev['user'] for rev in revisions.find({'title':top_edited_page})]))
 		
+		print '<%s> was edited %i times, by %i different editors.' % (top_edited_page, count, editors)
 		for revision in revisions.find({'title':top_edited_page}):
-			print '\t %s by <%s> at <%s>' % (revision['type'], revision['user'], revision['timestamp'])
-			print '\t\t Mutation: %i' % (revision['newlen'] - revision['oldlen'])
+			print '\t %s by <%s> at <%s> (%i)' % (revision['type'], revision['user'], revision['timestamp'], (revision['newlen'] - revision['oldlen']))
 			 
 if __name__ == '__main__':
 	client = pymongo.MongoClient()
