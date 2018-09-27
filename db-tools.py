@@ -24,10 +24,13 @@ class Db():
 
 		for top_edited_page, count in top_edited_pages:
 			editors = len(Counter([rev['user'] for rev in self.revisions.find({'title':top_edited_page})]))
-		
+			total_bytes = 0
+
 			print '<%s> was edited %i times, by %i different editors.' % (top_edited_page, count, editors)
 			for revision in self.revisions.find({'title':top_edited_page}):
 				print '\t %s by <%s> at <%s> (%i)' % (revision['type'], revision['user'], revision['timestamp'], (revision['newlen'] - revision['oldlen']))	
+				total_bytes += (revision['newlen'] - revision['oldlen'])
+			print 'Total mutations %i bytes' % total_bytes
 
 	def get_edits(self):
 		edits_per_user = self.df['user'].value_counts().to_dict()
