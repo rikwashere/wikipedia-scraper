@@ -49,7 +49,7 @@ class Db():
 				edits['> 100'].append(editor)
 
 		
-		self.u_pages_editted = len(df['title'].value_counts().to_dict())
+		self.u_pages_editted = len(self.df['title'].value_counts().to_dict())
 		
 		print '%i unique pages were editted.' % self.u_pages_editted
 
