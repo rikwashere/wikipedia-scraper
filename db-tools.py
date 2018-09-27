@@ -5,11 +5,11 @@ import pymongo
 class Db():
 	def __init__(self):
 		self.client = pymongo.MongoClient()
-		self.db = client.wikipedia
+		self.db = self.client.wikipedia
 		self.revisions = self.db.revisions
 		self.logs = self.db.logs
 		
-		cursor = collection.find(query)
+		cursor = self.revisions.find({})
 		df = pd.DataFrame(list(cursor))
 		del df['_id']
 		df.index = pd.to_datetime(df.timestamp)
@@ -20,13 +20,13 @@ class Db():
 		print 'Database is %.2f MB' % self.size_mb
 
 	def get_revisions(self):
-		top_edited_pages = Counter([rev['title'] for rev in revisions.find()]).most_common(20)
+		top_edited_pages = Counter([rev['title'] for rev in self.evisions.find()]).most_common(20)
 
 		for top_edited_page, count in top_edited_pages:
-			editors = len(Counter([rev['user'] for rev in revisions.find({'title':top_edited_page})]))
+			editors = len(Counter([rev['user'] for rev in self.revisions.find({'title':top_edited_page})]))
 		
 			print '<%s> was edited %i times, by %i different editors.' % (top_edited_page, count, editors)
-			for revision in revisions.find({'title':top_edited_page}):
+			for revision in self.revisions.find({'title':top_edited_page}):
 				print '\t %s by <%s> at <%s> (%i)' % (revision['type'], revision['user'], revision['timestamp'], (revision['newlen'] - revision['oldlen']))	
 
 	def get_edits(self):
