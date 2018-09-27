@@ -3,7 +3,7 @@ import pandas as pd
 import pymongo
 
 class Db():
-	def __init__:
+	def __init__(self):
 		self.client = pymongo.MongoClient()
 		self.db = client.wikipedia
 		self.revisions = self.db.revisions
