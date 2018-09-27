@@ -20,7 +20,7 @@ class Db():
 		print 'Database is %.2f MB' % self.size_mb
 
 	def get_revisions(self):
-		top_edited_pages = Counter([rev['title'] for rev in self.revisions.find()]).most_common(20)
+		top_edited_pages = Counter([rev['title'] for rev in self.revisions.find()]).most_common(100)
 
 		for top_edited_page, count in top_edited_pages:
 			editors = len(Counter([rev['user'] for rev in self.revisions.find({'title':top_edited_page})]))
