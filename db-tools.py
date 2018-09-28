@@ -9,6 +9,9 @@ class Db():
 		self.revisions = self.db.revisions
 		self.logs = self.db.logs
 		
+#		self.df = self.build_df()
+
+	def build_df(self):
 		cursor = self.revisions.find({})
 		df = pd.DataFrame(list(cursor))
 		del df['_id']
