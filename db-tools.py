@@ -55,10 +55,13 @@ class Db():
 		
 		self.u_pages_editted = len(self.df['title'].value_counts().to_dict())
 		
-		print '%i unique pages were editted. By %i editors' % (self.u_pages_editted, len(self.df['user'].value_counts().to_dict()))
+		print '%i unique pages were editted, by %i editors.' % (self.u_pages_editted, len(self.df['user'].value_counts().to_dict()))
 
 		for edit in edits:
 			print '%s edits -> %i' % (edit, len(edits[edit]))
+
+	def get_edits_user(self, user):
+		return self.db.revisions.find({'user': user} )
 	
 if __name__ == '__main__':
 	Database = Db()
