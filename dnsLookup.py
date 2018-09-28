@@ -20,17 +20,20 @@ def lookup(target):
 def process(response):
 	attrs = [attrs['attributes']['attribute'] for attrs in response['objects']['object']]
 	output = {}
+
 	
 	for attrz in attrs:
 		for attr in attrz: 
 			output[attr['name']] = attr['value']
-				
-	ip_range = output['inetnum']
-	low, high = ip_range.split(' - ')
-	
-	output['ip_range'] = {	'low' : low,
-							'high' : high
-						}
+	return output
+
+	if output.has_key('inetnum'):	#ipv4			
+		ip_range = output['inetnum']
+		low, high = ip_range.split(' - ')
+		
+		output['ip_range'] = {	'low' : low,
+								'high' : high
+							}	
 	
 	return output
 
