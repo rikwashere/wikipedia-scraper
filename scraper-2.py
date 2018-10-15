@@ -67,14 +67,22 @@ if __name__ == '__main__':
 		for rev_id in data['revisions']:
 			if rev_id > max_rev:
 				print '\tNew revision: %i > %i (%s)' % (rev_id, max_rev, data['revisions'][rev_id]['timestamp'])
-				revisions_db.insert_one(data['revisions'][rev_id], upsert=True)
+
+				try:
+					revisions_db.insert_one(data['revisions'][rev_id])
+				except pymongo.errors.DuplicateKeyError:
+					continue
 			else:
 				print '\tOld revision: %i < %i (%s)' % (rev_id, max_rev, data['revisions'][rev_id]['timestamp'])
 
 		for log_id in data['logs']:	
 			if log_id > max_log:
 				print '\tNew log: %i > %i (%s)' % (log_id, max_log, data['logs'][log_id]['timestamp']) 
-				logs_db.insert_one(data['logs'][log_id], upsert=True)
+				
+				try:
+					logs_db.insert_one(data['logs'][log_id])
+				except pymongo.errors.DuplicateKeyError:
+					continue
 			else:
 				print '\tOld log: %i < %i (%s)' % (log_id, max_log, data['logs'][log_id]['timestamp']) 
 
