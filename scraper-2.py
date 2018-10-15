@@ -8,6 +8,7 @@ import random
 import json
 import time
 import csv
+import os
 
 def scrape_api(data, source, params, data_keys):	
 	r = requests.get(source, params=params)
@@ -37,7 +38,14 @@ def getLastUpdate(logs, revisions):
 
 if __name__ == '__main__':
 
-	with open('logs.csv', 'a') as csv_out:
+        if 'logs.csv' in os.listdir('.'):
+            with open('logs.csv', 'a') as csv_out:
+                writer = csv.writer(csv_out, delimiter='\t')
+                writer.writerow([datetime.datetime.time(datetime.datetime.now()),
+                                'REBOOT',
+                                ])
+        else:
+	    with open('logs.csv', 'a') as csv_out:
 		writer = csv.writer(csv_out, delimiter='\t')
 		writer.writerow(['Time', 'New revs', 'New logs', 'Total revs', 'Total logs', 'Db size (mb)' ])
 
@@ -107,11 +115,11 @@ if __name__ == '__main__':
 						len(new_logs),
 						logs_db.count(), 
 						revisions_db.count(),
-						'%.2f' % db.command('dbstats')['dataSize'] / (1024 * 1024)
+						'%.2f' % float(db.command('dbstats')['dataSize'] / (1024 * 1024))
 					]
 
 		with open('logs.csv', 'a') as csv_out:
 			writer = csv.writer(csv_out, delimiter='\t')
-			wrwiter.writerow(data_out)
+			writer.writerow(data_out)
 
 		time.sleep(nap_time)
