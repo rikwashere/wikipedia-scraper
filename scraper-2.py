@@ -7,6 +7,7 @@ import pymongo
 import random
 import json
 import time
+import csv
 
 def scrape_api(data, source, params, data_keys):	
 	r = requests.get(source, params=params)
@@ -35,6 +36,11 @@ def getLastUpdate(logs, revisions):
 	return max_rev, max_log
 
 if __name__ == '__main__':
+
+	with open('logs.csv', 'a') as csv_out:
+		writer = csv.writer(csv_out, delimiter='\t')
+		writer.writerow(['Time', 'New revs', 'New logs', 'Total revs', 'Total logs', 'Db size (mb)' ])
+
 	# db stuff
 	client = pymongo.MongoClient()
 	db = client['wikipedia']
@@ -60,41 +66,52 @@ if __name__ == '__main__':
 				'rcprop' : '|'.join(data_keys)}
 	
 	while True:
-		print 'Scraping...'
+		#print 'Scraping...'
 		t0 = time.time()
 		data = scrape_api(data, source, params, data_keys)
+		new_revs = []
+		new_logs = []
 
 		for rev_id in data['revisions']:
 			if rev_id > max_rev:
-				print '\tNew revision: %i > %i (%s)' % (rev_id, max_rev, data['revisions'][rev_id]['timestamp'])
-
 				try:
 					revisions_db.insert_one(data['revisions'][rev_id])
 				except pymongo.errors.DuplicateKeyError:
 					continue
-			else:
-				print '\tOld revision: %i < %i (%s)' % (rev_id, max_rev, data['revisions'][rev_id]['timestamp'])
 
+				new_revs.append(rev_id)
+		
 		for log_id in data['logs']:	
-			if log_id > max_log:
-				print '\tNew log: %i > %i (%s)' % (log_id, max_log, data['logs'][log_id]['timestamp']) 
-				
+			if log_id > max_log:		
 				try:
 					logs_db.insert_one(data['logs'][log_id])
 				except pymongo.errors.DuplicateKeyError:
 					continue
-			else:
-				print '\tOld log: %i < %i (%s)' % (log_id, max_log, data['logs'][log_id]['timestamp']) 
 
-		nap_time = (time.time() - t0) * random.randint(30,40)
-		print 'Database contains %i logs and %i revisions.' % (logs_db.count(), revisions_db.count())
-		print 'Crawled %i revisions and %i logs so far.' % (len(data['revisions']), len(data['logs']))
-		print '%s - Sleeping %.2f seconds.\n' % (datetime.datetime.time(datetime.datetime.now()), nap_time)
+				new_logs.append(log_id)
 		
+		nap_time = (time.time() - t0) * random.randint(30,40)
+		#print 'Database contains %i logs and %i revisions.' % (logs_db.count(), revisions_db.count())
+		#print 'Crawled %i revisions and %i logs so far.' % (len(data['revisions']), len(data['logs']))
+		#print '%s - Sleeping %.2f seconds.\n' % (datetime.datetime.time(datetime.datetime.now()), nap_time)
+		
+
 		max_rev, max_log = getLastUpdate(logs_db, revisions_db)
 
 		data = {'revisions' : {},
 				'logs' : {}
 			}
+
+		data_out = [	datetime.datetime.time(datetime.datetime.now()),
+						len(new_revs),
+						len(new_logs),
+						logs_db.count(), 
+						revisions_db.count(),
+						'%.2f' % db.command('dbstats')['dataSize'] / (1024 * 1024)
+					]
+
+		with open('logs.csv', 'a') as csv_out:
+			writer = csv.writer(csv_out, delimiter='\t')
+			wrwiter.writerow(data_out)
 
 		time.sleep(nap_time)
