@@ -10,19 +10,24 @@ import time
 
 def scrape_api(data, source, params, data_keys):	
 	r = requests.get(source, params=params)
-	json_response = json.loads(r.text)
-	changes = json_response['query']['recentchanges']
 
-	for change in changes:
-		
-		if change.has_key('logid') and change['revid'] == 0:
-			change['_id'] = change['logid']
-			data['logs'][change['_id']] = change
- 		else:
-			change['_id'] = change['revid']
-			data['revisions'][change['_id']] = change
+	if r.status_code == 200:
+		json_response = json.loads(r.text)
+		changes = json_response['query']['recentchanges']
 
-	return data
+		for change in changes:
+			
+			if change.has_key('logid') and change['revid'] == 0:
+				change['_id'] = change['logid']
+				data['logs'][change['_id']] = change
+	 		else:
+				change['_id'] = change['revid']
+				data['revisions'][change['_id']] = change
+
+		return data
+	else:
+		time.sleep(2)
+		return []
 
 def getLastUpdate(logs, revisions):
 	max_log = max(logs.find({}, {'_id': 1}))['_id']
@@ -61,15 +66,15 @@ if __name__ == '__main__':
 
 		for rev_id in data['revisions']:
 			if rev_id > max_rev:
-				print '\tNew revision: %i > %i (%s)' % (rev_id, max_rev, data['revisions'][rev_id]['timestamp']) 
-				revisions_db.insert_one(data['revisions'][rev_id])
+				print '\tNew revision: %i > %i (%s)' % (rev_id, max_rev, data['revisions'][rev_id]['timestamp'])
+				revisions_db.insert_one(data['revisions'][rev_id], upsert=True)
 			else:
 				print '\tOld revision: %i < %i (%s)' % (rev_id, max_rev, data['revisions'][rev_id]['timestamp'])
 
 		for log_id in data['logs']:	
 			if log_id > max_log:
 				print '\tNew log: %i > %i (%s)' % (log_id, max_log, data['logs'][log_id]['timestamp']) 
-				logs_db.insert_one(data['logs'][log_id])
+				logs_db.insert_one(data['logs'][log_id], upsert=True)
 			else:
 				print '\tOld log: %i < %i (%s)' % (log_id, max_log, data['logs'][log_id]['timestamp']) 
 
