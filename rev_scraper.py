@@ -16,8 +16,9 @@ params = {	'action' : 'query',
 processed = os.listdir('revisions')
 
 def log(txt):
-	with open('logs.txt', 'a') as text_out:
+	with open('logs.txt', 'ab') as text_out:
 		text_out.write(txt)
+		text_out.write('\n')
 
 with open('top10k.csv', 'r') as csv_in:
 	titles = csv.DictReader(csv_in)
@@ -47,6 +48,6 @@ with open('top10k.csv', 'r') as csv_in:
 			json.dump(revisions['query'], json_out, sort_keys=True, indent=4, encoding='utf8')
 
 		nap_time = time.time() - t0
-		log('%s Query completed in %.2f. Sleeping %.2f' % (time.time)nap_time, nap_time * 10)
+		log('%s Query completed in %.2f. Sleeping %.2f' % (time.time(), nap_time, nap_time * 10))
 
 		time.sleep(nap_time)
