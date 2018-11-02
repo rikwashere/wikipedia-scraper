@@ -11,7 +11,7 @@ def log(txt):
 
 if __name__ == '__main__':
 	target = raw_input('Load which file?\n> ')
-        crawl_revisions(target)
+	crawl_revisions(target)
         
 def crawl_revisions(file):
 	sauce = 'https://nl.wikipedia.org/w/api.php?'
