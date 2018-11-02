@@ -1,15 +1,17 @@
+import pandas as pd
 import requests
 import json
 import time
 import csv
+import sys
 import os
 
 def log(txt):
 	with open('logs.txt', 'ab') as text_out:
 		text_out.write(txt)
 		text_out.write('\n')
-		        
-def crawl_revisions(file):
+
+def crawl_revisions_page(file):
 	sauce = 'https://nl.wikipedia.org/w/api.php?'
 	params = {	'action' : 'query',
 					'rvlimit': 'max',
@@ -51,6 +53,29 @@ def crawl_revisions(file):
 
 			time.sleep(nap_time)
 
+def crawl_revisions_user(user):
+	sauce = "https://en.wikipedia.org/w/api.php"
+	params = {	'action' : 'query',
+				'list' : 'allrevisions',
+				'arvuser' : user_name,
+				'arvlimit': 'max',
+				'arvprop': 'ids|flags|timestamp|user|userid|size|tags',
+				'format': 'json'
+			}
+
+	r = requests.get(sauce, params=params)
+
+	response = json.loads(r.text)
+	revisions = response['query']['allrevisions']
+	print 'Found %i revisions for %s' % (len(revisions), user)
+	json.dump(revisions, open('data/%s.json' % user, 'w'), indent=4, sort_keys=True)
+
+
+
+
 if __name__ == '__main__':
 	target = raw_input('Load which file?\n> ')
-	crawl_revisions(target)
+	df = pd.read_csv(target)
+
+	for user_name in df['user_name']:
+		crawl_revisions_user(user_name)
