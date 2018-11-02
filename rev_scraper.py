@@ -8,11 +8,7 @@ def log(txt):
 	with open('logs.txt', 'ab') as text_out:
 		text_out.write(txt)
 		text_out.write('\n')
-
-if __name__ == '__main__':
-	target = raw_input('Load which file?\n> ')
-	crawl_revisions(target)
-        
+		        
 def crawl_revisions(file):
 	sauce = 'https://nl.wikipedia.org/w/api.php?'
 	params = {	'action' : 'query',
@@ -54,3 +50,7 @@ def crawl_revisions(file):
 			log('%s Query completed in %.2f. Sleeping %.2f' % (time.time(), nap_time, nap_time * 10))
 
 			time.sleep(nap_time)
+
+if __name__ == '__main__':
+	target = raw_input('Load which file?\n> ')
+	crawl_revisions(target)
