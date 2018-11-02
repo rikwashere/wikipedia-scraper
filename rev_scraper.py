@@ -4,8 +4,6 @@ import time
 import csv
 import os
 
-processed = os.listdir('revisions')
-
 def log(txt):
 	with open('logs.txt', 'ab') as text_out:
 		text_out.write(txt)
@@ -13,8 +11,9 @@ def log(txt):
 
 if __name__ == '__main__':
 	target = raw_input('Load which file?\n> ')
-
-def crawl_revisions(file)
+        crawl_revisions(target)
+        
+def crawl_revisions(file):
 	sauce = 'https://nl.wikipedia.org/w/api.php?'
 	params = {	'action' : 'query',
 					'rvlimit': 'max',
@@ -28,9 +27,9 @@ def crawl_revisions(file)
 		titles = csv.DictReader(csv_in)
 
 		for title in titles:
-			if title['page_id'] + '.json' in processed:
-				log('Already processed <%s>...' % title['page_title'])
-				continue
+#			if title['page_id'] + '.json' in processed:
+#				log('Already processed <%s>...' % title['page_title'])
+#				continue
 
 			t0 = time.time()
 			log('Requesting <%s>...' % title['page_title'])
